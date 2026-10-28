@@ -1,123 +1,303 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador de Pasos en Tiempo Real</title>
+  <title>StepTracker Pro - Contador de Pasos Futurista</title>
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              dark: '#070a12',
+              card: 'rgba(15, 23, 42, 0.65)',
+              border: 'rgba(255, 255, 255, 0.08)',
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              violet: '#8b5cf6',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'spin-slow': 'spin 12s linear infinite',
+            'float': 'float 4s ease-in-out infinite',
+            'glow-pulse': 'glowPulse 2s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            glowPulse: {
+              '0%': { filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.3))' },
+              '100%': { filter: 'drop-shadow(0 0 25px rgba(6, 182, 212, 0.7))' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-    
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #0f172a;
+      background-color: #050811;
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(139, 92, 246, 0.05) 0px, transparent 70%);
+      background-attachment: fixed;
       color: #f8fafc;
     }
 
+    /* SVG Ring Styling */
     .circle-bg {
       fill: none;
-      stroke: #1e293b;
-      stroke-width: 12;
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-width: 14;
+    }
+
+    .circle-track {
+      fill: none;
+      stroke: rgba(15, 23, 42, 0.8);
+      stroke-width: 14;
     }
 
     .circle-progress {
       fill: none;
       stroke: url(#gradient);
-      stroke-width: 12;
+      stroke-width: 14;
       stroke-dasharray: 502;
       stroke-dashoffset: 502;
       stroke-linecap: round;
-      transition: stroke-dashoffset 0.3s ease;
+      transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .glow {
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+    /* Custom Glassmorphism Box */
+    .glass-box {
+      background: rgba(13, 20, 36, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-card {
+      background: rgba(20, 30, 55, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      background: rgba(30, 41, 69, 0.6);
+      border-color: rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Glow Effects */
+    .btn-emerald-glow {
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.5);
+    }
+    
+    .btn-emerald-glow:hover {
+      box-shadow: 0 0 35px -2px rgba(16, 185, 129, 0.7);
+    }
+
+    .btn-amber-glow {
+      box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.5);
+    }
+
+    /* Ripple Animation on Click */
+    .step-active-pulse {
+      animation: pulse-ring 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.97); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
     }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 overflow-x-hidden select-none">
 
-  <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl glow relative overflow-hidden">
+  <!-- Ambient Light Effects -->
+  <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+  <div class="fixed bottom-1/4 left-1/2 -translate-x-1/2 translate-y-1/2 w-[450px] h-[450px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+  <!-- Main Container Card -->
+  <div id="mainCard" class="w-full max-w-md glass-box rounded-[2.5rem] p-6 sm:p-8 relative z-10 overflow-hidden transition-all duration-300">
     
-    <!-- Encabezado -->
+    <!-- Decorative Ambient Top Bar -->
+    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 opacity-80"></div>
+
+    <!-- Header Section -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-extrabold text-white flex items-center gap-2">
-          <i class="fa-solid fa-shoe-prints text-emerald-400"></i> StepTracker
-        </h1>
-        <p class="text-xs text-slate-400 mt-1" id="statusText">Listo para empezar</p>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
+            <i class="fa-solid fa-shoe-prints text-base transform -rotate-45"></i>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 mt-2">
+          <span id="statusIndicator" class="w-2 h-2 rounded-full bg-slate-500"></span>
+          <p class="text-xs font-medium text-slate-400" id="statusText">Listo para empezar</p>
+        </div>
       </div>
-      <button id="permissionBtn" class="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-semibold transition border border-emerald-500/30">
-        Activar Sensor
+
+      <button id="permissionBtn" class="bg-gradient-to-r from-emerald-500/15 to-teal-500/15 hover:from-emerald-500/25 hover:to-teal-500/25 text-emerald-300 border border-emerald-500/30 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm">
+        <i class="fa-solid fa-microchip text-xs"></i>
+        <span>Activar Sensor</span>
       </button>
     </div>
 
-    <!-- Indicador de Progreso Circular -->
-    <div class="relative flex items-center justify-center my-6">
-      <svg class="w-64 h-64 transform -rotate-90">
+    <!-- Circular Step Counter Ring -->
+    <div class="relative flex items-center justify-center my-8">
+      
+      <!-- Outer Decorative Glow Ring -->
+      <div class="absolute w-64 h-64 rounded-full bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 blur-xl"></div>
+
+      <!-- Animated Pulse Ring when Active -->
+      <div id="pulseRing" class="absolute w-60 h-60 rounded-full border border-emerald-500/20 opacity-0 transition-opacity duration-500"></div>
+
+      <svg class="w-72 h-72 transform -rotate-90 relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.25)]">
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#10b981" />
+            <stop offset="50%" stop-color="#14b8a6" />
             <stop offset="100%" stop-color="#06b6d4" />
           </linearGradient>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
         </defs>
-        <circle cx="128" cy="128" r="80" class="circle-bg"></circle>
-        <circle id="progressCircle" cx="128" cy="128" r="80" class="circle-progress"></circle>
+
+        <!-- Outer Track Background -->
+        <circle cx="144" cy="144" r="80" class="circle-bg"></circle>
+        
+        <!-- Track Base Circle -->
+        <circle cx="144" cy="144" r="80" class="circle-track"></circle>
+        
+        <!-- Animated Progress Circle -->
+        <circle id="progressCircle" cx="144" cy="144" r="80" class="circle-progress" filter="url(#glow)"></circle>
       </svg>
 
-      <!-- Contador Central -->
-      <div class="absolute flex flex-col items-center justify-center text-center">
-        <span id="stepCount" class="text-5xl font-black text-white tracking-tight">0</span>
-        <span class="text-xs uppercase tracking-widest text-slate-400 font-bold mt-1">Pasos</span>
-        <div class="mt-2 text-xs text-emerald-400 font-semibold bg-emerald-950/60 px-3 py-0.5 rounded-full border border-emerald-800/40">
-          Meta: <span id="goalText">10,000</span>
+      <!-- Central Step Display Content -->
+      <div class="absolute z-20 flex flex-col items-center justify-center text-center">
+        <!-- Percentage pill -->
+        <div id="percentBadge" class="text-[10px] font-black uppercase tracking-widest text-teal-300 bg-teal-950/80 border border-teal-500/30 px-2.5 py-0.5 rounded-full mb-1">
+          0%
+        </div>
+
+        <span id="stepCount" class="text-5xl font-black text-white tracking-tight drop-shadow-md my-0.5">0</span>
+        
+        <span class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-extrabold">Pasos totales</span>
+        
+        <!-- Goal Pill -->
+        <div class="mt-3 text-xs text-slate-300 font-bold bg-slate-900/80 px-3 py-1 rounded-full border border-slate-700/60 flex items-center gap-1.5 shadow-inner">
+          <i class="fa-solid fa-bullseye text-emerald-400 text-xs"></i>
+          <span>Meta: <span id="goalText" class="text-emerald-400 font-extrabold">10,000</span></span>
         </div>
       </div>
     </div>
 
-    <!-- Métricas Adicionales -->
+    <!-- Secondary Metrics Section -->
     <div class="grid grid-cols-3 gap-3 mb-6">
-      <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-2xl text-center">
-        <i class="fa-solid fa-fire text-orange-400 text-lg mb-1"></i>
-        <div id="caloriesCount" class="text-lg font-bold text-slate-100">0</div>
-        <div class="text-[10px] uppercase font-bold text-slate-400">Kcal</div>
+      
+      <!-- Calories Card -->
+      <div class="glass-card p-3.5 rounded-2xl text-center relative overflow-hidden group">
+        <div class="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-fire text-sm"></i>
+        </div>
+        <div id="caloriesCount" class="text-xl font-extrabold text-white tracking-tight">0</div>
+        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mt-0.5">Kcal</div>
       </div>
 
-      <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-2xl text-center">
-        <i class="fa-solid fa-route text-cyan-400 text-lg mb-1"></i>
-        <div id="distanceCount" class="text-lg font-bold text-slate-100">0.00</div>
-        <div class="text-[10px] uppercase font-bold text-slate-400">Km</div>
+      <!-- Distance Card -->
+      <div class="glass-card p-3.5 rounded-2xl text-center relative overflow-hidden group">
+        <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-route text-sm"></i>
+        </div>
+        <div id="distanceCount" class="text-xl font-extrabold text-white tracking-tight">0.00</div>
+        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mt-0.5">Km</div>
       </div>
 
-      <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-2xl text-center">
-        <i class="fa-solid fa-stopwatch text-purple-400 text-lg mb-1"></i>
-        <div id="timerText" class="text-lg font-bold text-slate-100">00:00</div>
-        <div class="text-[10px] uppercase font-bold text-slate-400">Tiempo</div>
+      <!-- Active Timer Card -->
+      <div class="glass-card p-3.5 rounded-2xl text-center relative overflow-hidden group">
+        <div class="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-stopwatch text-sm"></i>
+        </div>
+        <div id="timerText" class="text-xl font-extrabold text-white tracking-tight">00:00</div>
+        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mt-0.5">Tiempo</div>
       </div>
     </div>
 
-    <!-- Botones de Control Principal -->
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <button id="toggleBtn" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
-        <i class="fa-solid fa-play" id="toggleIcon"></i>
+    <!-- Main Action Buttons -->
+    <div class="grid grid-cols-2 gap-3 mb-5">
+      <button id="toggleBtn" class="bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold py-4 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2.5 btn-emerald-glow active:scale-95 text-sm tracking-wide">
+        <i class="fa-solid fa-play text-xs" id="toggleIcon"></i>
         <span id="toggleText">Iniciar</span>
       </button>
 
-      <button id="resetBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3.5 px-4 rounded-xl transition border border-slate-700 flex items-center justify-center gap-2">
-        <i class="fa-solid fa-rotate-left"></i>
+      <button id="resetBtn" class="bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white font-bold py-4 px-4 rounded-2xl transition-all duration-300 border border-slate-700/80 flex items-center justify-center gap-2.5 active:scale-95 text-sm">
+        <i class="fa-solid fa-rotate-left text-xs text-slate-400"></i>
         <span>Reiniciar</span>
       </button>
     </div>
 
-    <!-- Modo Simulación para Pruebas en Laptop/Escritorio -->
+    <!-- Desktop Simulation Panel -->
     <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between">
-      <span class="text-xs text-slate-400 font-medium">Simular pasos (para PC)</span>
-      <button id="simStepBtn" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold px-3 py-1.5 rounded-lg transition">
-        +1 Paso manual
+      <div class="flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
+        <span class="text-xs text-slate-400 font-semibold">Simular en PC</span>
+      </div>
+      <button id="simStepBtn" class="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold px-3.5 py-2 rounded-xl transition-all duration-200 flex items-center gap-1.5 active:scale-95">
+        <i class="fa-solid fa-plus text-[10px]"></i>
+        <span>1 Paso Manual</span>
       </button>
     </div>
 
+  </div>
+
+  <!-- Custom Confirmation Modal (Replaces standard alert/confirm) -->
+  <div id="customModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-opacity duration-300 opacity-0">
+    <div class="glass-box max-w-xs w-full p-6 rounded-3xl text-center border border-slate-700/80 transform scale-90 transition-transform duration-300" id="modalBox">
+      <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-4 text-xl">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-2" id="modalTitle">¿Reiniciar contador?</h3>
+      <p class="text-xs text-slate-300 mb-6" id="modalDescription">Se borrarán todos tus pasos, tiempo y calorías registradas en esta sesión.</p>
+      <div class="flex gap-3">
+        <button id="modalCancelBtn" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition border border-slate-700">Cancelar</button>
+        <button id="modalConfirmBtn" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-xs transition">Reiniciar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Notification Popup -->
+  <div id="toastAlert" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 glass-card bg-slate-900/90 border border-slate-700 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 translate-y-[-100px] opacity-0 transition-all duration-300">
+    <i class="fa-solid fa-circle-info text-cyan-400 text-sm" id="toastIcon"></i>
+    <span id="toastMessage">Notificación</span>
   </div>
 
   <script>
@@ -147,9 +327,41 @@
     const permissionBtn = document.getElementById('permissionBtn');
     const simStepBtn = document.getElementById('simStepBtn');
     const statusText = document.getElementById('statusText');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const percentBadge = document.getElementById('percentBadge');
+    const pulseRing = document.getElementById('pulseRing');
+    const mainCard = document.getElementById('mainCard');
+
+    // Elementos del Modal Personalizado
+    const customModal = document.getElementById('customModal');
+    const modalBox = document.getElementById('modalBox');
+    const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
 
     // Inicialización del círculo de progreso (Circunferencia = 2 * PI * 80 ≈ 502)
     const circumference = 502;
+
+    // Mostrar Notificación Toast
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toastAlert');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.textContent = message;
+      if (type === 'error') {
+        toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-sm";
+      } else {
+        toastIcon.className = "fa-solid fa-circle-info text-emerald-400 text-sm";
+      }
+
+      toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-[-100px]', 'opacity-0');
+      }, 3000);
+    }
 
     function updateMetrics() {
       // Cálculo estimado: 1 paso ≈ 0.75m | 1 paso ≈ 0.04 kcal
@@ -160,9 +372,12 @@
       distanceCountEl.textContent = distanceKm;
       caloriesCountEl.textContent = calories;
 
-      // Actualizar Barra Circular
-      const percent = Math.min(steps / goal, 1);
-      const offset = circumference - (percent * circumference);
+      // Actualizar Barra Circular y porcentaje
+      const percentRatio = Math.min(steps / goal, 1);
+      const percentVal = Math.round(percentRatio * 100);
+      percentBadge.textContent = `${percentVal}%`;
+
+      const offset = circumference - (percentRatio * circumference);
       progressCircle.style.strokeDashoffset = offset;
     }
 
@@ -171,9 +386,13 @@
       steps++;
       updateMetrics();
 
+      // Animación visual de micro-pulso
+      mainCard.classList.add('step-active-pulse');
+      setTimeout(() => mainCard.classList.remove('step-active-pulse'), 300);
+
       // Retroalimentación Háptica (si está disponible en móvil)
       if (navigator.vibrate) {
-        navigator.vibrate(30);
+        navigator.vibrate(25);
       }
     }
 
@@ -203,20 +422,49 @@
           const response = await DeviceMotionEvent.requestPermission();
           if (response === 'granted') {
             window.addEventListener('devicemotion', handleMotion);
-            statusText.textContent = "Sensor conectado y activo";
+            updateStatusState('sensor-on');
             permissionBtn.classList.add('hidden');
+            showToast('Sensor de movimiento conectado', 'info');
           } else {
-            alert('Permiso de sensores denegado.');
+            showToast('Permiso de sensores denegado', 'error');
           }
         } catch (e) {
           console.error(e);
         }
       } else if ('DeviceMotionEvent' in window) {
         window.addEventListener('devicemotion', handleMotion);
-        statusText.textContent = "Sensor conectado";
+        updateStatusState('sensor-on');
         permissionBtn.classList.add('hidden');
+        showToast('Sensor conectado correctamente', 'info');
       } else {
+        updateStatusState('sensor-off');
+        showToast('Sin soporte de acelerómetro. Usa el modo manual.', 'error');
+      }
+    }
+
+    function updateStatusState(state) {
+      if (state === 'active') {
+        statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]";
+        statusText.textContent = "Registrando pasos...";
+        statusText.className = "text-xs font-semibold text-emerald-400";
+        pulseRing.classList.remove('opacity-0');
+        pulseRing.classList.add('opacity-100', 'animate-ping');
+      } else if (state === 'paused') {
+        statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+        statusText.textContent = "En pausa";
+        statusText.className = "text-xs font-medium text-amber-300";
+        pulseRing.classList.add('opacity-0');
+        pulseRing.classList.remove('opacity-100', 'animate-ping');
+      } else if (state === 'sensor-on') {
+        statusText.textContent = "Sensor conectado y activo";
+      } else if (state === 'sensor-off') {
         statusText.textContent = "Sin soporte de hardware (Usa modo simulación)";
+      } else {
+        statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-slate-500";
+        statusText.textContent = "Listo para empezar";
+        statusText.className = "text-xs font-medium text-slate-400";
+        pulseRing.classList.add('opacity-0');
+        pulseRing.classList.remove('opacity-100', 'animate-ping');
       }
     }
 
@@ -242,36 +490,63 @@
         startTimer();
         requestSensorPermission();
         toggleText.textContent = "Pausar";
-        toggleIcon.className = "fa-solid fa-pause";
-        toggleBtn.className = "bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20";
-        statusText.textContent = "Registrando pasos...";
+        toggleIcon.className = "fa-solid fa-pause text-xs";
+        
+        toggleBtn.className = "bg-gradient-to-r from-amber-500 to-orange-400 hover:from-amber-400 hover:to-orange-300 text-slate-950 font-extrabold py-4 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2.5 btn-amber-glow active:scale-95 text-sm tracking-wide";
+        updateStatusState('active');
       } else {
         stopTimer();
         toggleText.textContent = "Continuar";
-        toggleIcon.className = "fa-solid fa-play";
-        toggleBtn.className = "bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20";
-        statusText.textContent = "En pausa";
+        toggleIcon.className = "fa-solid fa-play text-xs";
+        
+        toggleBtn.className = "bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold py-4 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2.5 btn-emerald-glow active:scale-95 text-sm tracking-wide";
+        updateStatusState('paused');
       }
     });
 
-    // Resetear Valores
+    // Resetear Valores con Modal Personalizado
+    function openModal() {
+      customModal.classList.remove('hidden');
+      setTimeout(() => {
+        customModal.classList.remove('opacity-0');
+        modalBox.classList.remove('scale-90');
+        modalBox.classList.add('scale-100');
+      }, 10);
+    }
+
+    function closeModal() {
+      customModal.classList.add('opacity-0');
+      modalBox.classList.remove('scale-100');
+      modalBox.classList.add('scale-90');
+      setTimeout(() => {
+        customModal.classList.add('hidden');
+      }, 300);
+    }
+
     resetBtn.addEventListener('click', () => {
-      if (confirm("¿Deseas reiniciar el contador de pasos?")) {
-        isActive = false;
-        stopTimer();
-        steps = 0;
-        secondsActive = 0;
-        timerTextEl.textContent = "00:00";
-        toggleText.textContent = "Iniciar";
-        toggleIcon.className = "fa-solid fa-play";
-        toggleBtn.className = "bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20";
-        statusText.textContent = "Listo para empezar";
-        updateMetrics();
-      }
+      openModal();
+    });
+
+    modalCancelBtn.addEventListener('click', closeModal);
+
+    modalConfirmBtn.addEventListener('click', () => {
+      closeModal();
+      isActive = false;
+      stopTimer();
+      steps = 0;
+      secondsActive = 0;
+      timerTextEl.textContent = "00:00";
+      toggleText.textContent = "Iniciar";
+      toggleIcon.className = "fa-solid fa-play text-xs";
+      toggleBtn.className = "bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold py-4 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2.5 btn-emerald-glow active:scale-95 text-sm tracking-wide";
+      updateStatusState('reset');
+      updateMetrics();
+      showToast('Contador reiniciado', 'info');
     });
 
     // Eventos de botones secundarios
     permissionBtn.addEventListener('click', requestSensorPermission);
+    
     simStepBtn.addEventListener('click', () => {
       if (!isActive) {
         toggleBtn.click(); // Iniciar automáticamente si está pausado
